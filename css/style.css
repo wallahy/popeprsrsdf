@@ -2060,3 +2060,101 @@ body[data-accent-color] .nav-item.active::before {
   background: linear-gradient(180deg, #6875F5, #5562D6) !important;
   box-shadow: 0 4px 20px rgba(88, 101, 242, 0.4) !important;
 }
+
+/* VPN Toggle Switch */
+.vpn-toggle {
+  position: relative;
+  width: 80px;
+  height: 40px;
+  background: #2a2a36;
+  border-radius: 20px;
+  border: 2px solid #3a3a48;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 0 auto;
+}
+
+.vpn-toggle.active {
+  background: #4a9eff;
+  border-color: #4a9eff;
+}
+
+.vpn-toggle-circle {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 30px;
+  height: 30px;
+  background: #fff;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.vpn-toggle.active .vpn-toggle-circle {
+  transform: translateX(40px);
+}
+/* Token Profile Pictures */
+.tok-pfp {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #3a3a48;
+}
+
+.tok-pfp-empty {
+  background: #2a2a36;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8892b0;
+  font-size: 12px;
+}
+
+.tok-pfp-empty:before {
+  content: "👤";
+}
+/* Pulse animation for coming soon indicator */
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* Coming soon notification */
+.coming-soon-notification {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 10000;
+  animation: slideInLeft 0.3s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes slideOutLeft {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}

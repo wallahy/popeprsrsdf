@@ -659,3 +659,30 @@
       }, 800);
     }
   })();
+// ---- Coming Soon Notification ----
+window.showComingSoonNotification = function() {
+  // Remove existing notifications
+  const existing = document.querySelectorAll('.coming-soon-notification');
+  existing.forEach(el => el.remove());
+
+  // Create new notification
+  const notification = document.createElement('div');
+  notification.className = 'coming-soon-notification';
+  notification.textContent = '🚀 Coming Soon - This feature is in development';
+  
+  // Add to page
+  document.body.appendChild(notification);
+  
+  // Auto-remove after 3 seconds
+  setTimeout(() => {
+    notification.style.animation = 'slideOutLeft 0.3s ease-in';
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    }, 300);
+  }, 3000);
+
+  // Play sound if available
+  if (window.GWSound) window.GWSound.click();
+};
