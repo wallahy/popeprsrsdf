@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GhostWare — Access</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./css/style.css" />
+<link rel="icon" href="./assets/reaper.svg" />
+</head>
+<body>
+<div id="grid"></div>
+<div id="aura"></div>
+<div id="glow"></div>
+<button class="sound-toggle" id="soundToggle" title="Toggle sound"></button>
+
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo"><div class="reaper float" data-reaper></div></div>
+    <div class="brand" style="justify-content:center;margin-bottom:4px;">
+      <span class="brand-name">GHOST<span class="accent">WARE</span></span>
+    </div>
+
+    <!-- ===== LOGIN ===== -->
+    <div class="view active" id="view-login">
+      <p class="auth-sub">Sign in to your operations console</p>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="li-email" placeholder="you@ghostware.io" autocomplete="username" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="li-pass" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <button class="btn" id="li-btn">Continue →</button>
+      <div class="msg" id="li-msg"></div>
+      <div class="auth-links">
+        <a data-go="forgot">Forgot password?</a>
+        <a data-go="signup">Create account</a>
+      </div>
+    </div>
+
+    <!-- ===== SIGN UP ===== -->
+    <div class="view" id="view-signup">
+      <p class="auth-sub">Create your GhostWare account</p>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="su-user" placeholder="reaper" />
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="su-email" placeholder="you@ghostware.io" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="su-pass" placeholder="min 6 characters" />
+        <div class="pw-meter" id="su-meter">
+          <div class="pw-bars"><i></i><i></i><i></i><i></i></div>
+          <div class="pw-label" id="su-meter-label"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Confirm Password</label>
+        <input type="password" id="su-pass2" placeholder="repeat password" />
+      </div>
+      <button class="btn" id="su-btn">Create account →</button>
+      <div class="msg" id="su-msg"></div>
+      <div class="auth-links">
+        <a data-go="login">← Back to sign in</a>
+      </div>
+    </div>
+
+    <!-- ===== FORGOT PASSWORD ===== -->
+    <div class="view" id="view-forgot">
+      <p class="auth-sub">Reset your password</p>
+      <div class="field">
+        <label>Account Email</label>
+        <input type="email" id="fp-email" placeholder="you@ghostware.io" />
+      </div>
+      <div class="field" id="fp-newwrap" style="display:none;">
+        <label>New Password</label>
+        <input type="password" id="fp-newpass" placeholder="new password" />
+        <div class="pw-meter" id="fp-meter">
+          <div class="pw-bars"><i></i><i></i><i></i><i></i></div>
+          <div class="pw-label" id="fp-meter-label"></div>
+        </div>
+      </div>
+      <button class="btn" id="fp-btn">Send reset link →</button>
+      <div class="msg" id="fp-msg"></div>
+      <div class="auth-links">
+        <a data-go="login">← Back to sign in</a>
+      </div>
+    </div>
+
+    <!-- ===== CAPTCHA (after login) ===== -->
+    <div class="view" id="view-captcha">
+      <p class="auth-sub">Verify you're human to enter</p>
+      <div class="captcha-box">
+        <div class="captcha-head">
+          <span>Type the code</span>
+          <button class="captcha-refresh" id="cap-refresh" title="New code">↻</button>
+        </div>
+        <div class="captcha-code" id="cap-code"><span class="captcha-strike"></span>XXXXX</div>
+      </div>
+      <div class="field" style="margin-top:14px;">
+        <input type="text" id="cap-input" placeholder="Enter code above" maxlength="5" style="text-align:center;letter-spacing:6px;text-transform:uppercase;font-family:var(--mono);" />
+      </div>
+      <button class="btn" id="cap-btn">Verify & Enter →</button>
+      <div class="msg" id="cap-msg"></div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- reaper logo injected -->
+<script src="./js/logo.js"></script>
+<script src="./js/auth.js"></script>
+<script src="./js/effects.js"></script>
+<script>
+(function () {
+  const { db, session, captcha, validEmail } = window.GWAuth;
+  const S = window.GWSound;
+
+  // already logged in? go to dashboard
+  if (session.get()) location.href = './dashboard.html';
+
+  const views = ['login', 'signup', 'forgot', 'captcha'];
+  function go(name) {
+    views.forEach(v => document.getElementById('view-' + v).classList.toggle('active', v === name));
+  }
+  document.querySelectorAll('[data-go]').forEach(a => a.addEventListener('click', () => go(a.dataset.go)));
+
+  function msg(el, text, type) {
+    const m = document.getElementById(el);
+    m.textContent = text; m.className = 'msg ' + (type || '');
+    if (type === 'err') S.err(); if (type === 'ok') S.ok();
+  }
+  function toast(t) {
+    const el = document.getElementById('toast');
+    el.textContent = t; el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2600);
+  }
+
+  let pendingEmail = null;
+
+  // ---- LOGIN ----
+  document.getElementById('li-btn').addEventListener('click', () => {
+    const email = document.getElementById('li-email').value;
+    const pass = document.getElementById('li-pass').value;
+    if (!validEmail(email)) return msg('li-msg', 'Enter a valid email address.', 'err');
+    const user = db.find(email);
+    if (!user) return msg('li-msg', 'No account found. Create one first.', 'err');
+    if (user.pass !== pass) return msg('li-msg', 'Incorrect password.', 'err');
+    msg('li-msg', 'Credentials verified — one more step…', 'ok');
+    pendingEmail = user.email;
+    newCaptcha();
+    setTimeout(() => go('captcha'), 500);
+  });
+
+  // ---- SIGN UP ----
+  document.getElementById('su-btn').addEventListener('click', () => {
+    const user = document.getElementById('su-user').value.trim();
+    const email = document.getElementById('su-email').value;
+    const p1 = document.getElementById('su-pass').value;
+    const p2 = document.getElementById('su-pass2').value;
+    if (!user) return msg('su-msg', 'Choose a username.', 'err');
+    if (!validEmail(email)) return msg('su-msg', 'Enter a valid email address.', 'err');
+    if (p1.length < 6) return msg('su-msg', 'Password must be at least 6 characters.', 'err');
+    if (p1 !== p2) return msg('su-msg', 'Passwords do not match.', 'err');
+    if (db.find(email)) return msg('su-msg', 'An account with that email already exists.', 'err');
+    db.add(email, user, p1);
+    msg('su-msg', 'Account created! Redirecting to sign in…', 'ok');
+    toast('Welcome to GhostWare, ' + user);
+    setTimeout(() => { document.getElementById('li-email').value = email; go('login'); }, 1200);
+  });
+
+  // ---- FORGOT PASSWORD ----
+  let resetStage = 0;
+  document.getElementById('fp-btn').addEventListener('click', () => {
+    const email = document.getElementById('fp-email').value;
+    if (!validEmail(email)) return msg('fp-msg', 'Enter a valid email address.', 'err');
+    if (resetStage === 0) {
+      if (!db.find(email)) return msg('fp-msg', 'No account uses that email.', 'err');
+      resetStage = 1;
+      document.getElementById('fp-newwrap').style.display = 'block';
+      document.getElementById('fp-btn').textContent = 'Update password →';
+      msg('fp-msg', 'Reset link "sent" to ' + email + '. Enter a new password below.', 'ok');
+      toast('Reset email sent to ' + email);
+    } else {
+      const np = document.getElementById('fp-newpass').value;
+      if (np.length < 6) return msg('fp-msg', 'New password must be at least 6 characters.', 'err');
+      db.setPass(email, np);
+      msg('fp-msg', 'Password updated! You can sign in now.', 'ok');
+      setTimeout(() => { resetStage = 0; document.getElementById('fp-newwrap').style.display = 'none';
+        document.getElementById('fp-btn').textContent = 'Send reset link →';
+        document.getElementById('li-email').value = email; go('login'); }, 1300);
+    }
+  });
+
+  // ---- CAPTCHA ----
+  function newCaptcha() {
+    const code = captcha.gen();
+    const el = document.getElementById('cap-code');
+    el.innerHTML = '<span class="captcha-strike"></span>' + code;
+    document.getElementById('cap-input').value = '';
+  }
+  document.getElementById('cap-refresh').addEventListener('click', newCaptcha);
+  document.getElementById('cap-btn').addEventListener('click', () => {
+    const val = document.getElementById('cap-input').value;
+    if (!captcha.check(val)) { msg('cap-msg', 'Captcha incorrect — try again.', 'err'); newCaptcha(); return; }
+    session.login(pendingEmail);
+    msg('cap-msg', 'Verified! Entering GhostWare…', 'ok');
+    setTimeout(() => location.href = './dashboard.html', 700);
+  });
+
+  // Enter key submits current view
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    const active = document.querySelector('.view.active');
+    const btn = active && active.querySelector('.btn');
+    if (btn) btn.click();
+  });
+
+  // ---- password strength meter ----
+  // score 0..4 from length + character-class variety, with common-password + repeat penalties
+  const COMMON = ['password', '123456', '12345678', 'qwerty', 'abc123', 'letmein', '111111', 'iloveyou', 'admin', 'welcome', 'monkey', 'dragon', 'ghostware'];
+  function pwStrength(pw) {
+    if (!pw) return { score: 0, label: '' };
+    let s = 0;
+    if (pw.length >= 6) s++;
+    if (pw.length >= 10) s++;
+    if (pw.length >= 14) s++;
+    let classes = 0;
+    if (/[a-z]/.test(pw)) classes++;
+    if (/[A-Z]/.test(pw)) classes++;
+    if (/\d/.test(pw)) classes++;
+    if (/[^A-Za-z0-9]/.test(pw)) classes++;
+    if (classes >= 2) s++;
+    if (classes >= 3) s++;
+    if (classes >= 4) s++;
+    // penalties
+    if (/^(.)\1+$/.test(pw)) s = 1;                              // all one repeated char
+    if (COMMON.some(c => pw.toLowerCase().includes(c))) s = Math.min(s, 1);
+    if (pw.length < 6) s = Math.min(s, 1);
+    const score = Math.max(1, Math.min(4, Math.round(s / 6 * 4)));
+    const labels = { 1: 'Weak', 2: 'Fair', 3: 'Good', 4: 'Strong' };
+    return { score, label: labels[score] };
+  }
+  function wireMeter(inputId, meterId, labelId) {
+    const input = document.getElementById(inputId);
+    const meter = document.getElementById(meterId);
+    const label = document.getElementById(labelId);
+    if (!input || !meter) return;
+    input.addEventListener('input', () => {
+      const { score, label: txt } = pwStrength(input.value);
+      meter.className = 'pw-meter' + (input.value ? ' s' + score : '');
+      if (label) label.textContent = input.value ? 'Password strength: ' + txt : '';
+    });
+  }
+  wireMeter('su-pass', 'su-meter', 'su-meter-label');
+  wireMeter('fp-newpass', 'fp-meter', 'fp-meter-label');
+
+  window.GWWire();
+})();
+</script>
+</body>
+</html>
