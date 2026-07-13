@@ -1,0 +1,114 @@
+/* ===================== GhostWare Desktop — custom title bar =====================
+   Frameless-window title bar. Gray/black theme, macOS traffic-light controls.
+   Only rendered inside the Electron app (js/titlebar.js injects the markup).
+   ================================================================================ */
+
+:root { --gw-titlebar-h: 38px; --gw-radius: 18px; }
+
+/* ---- rounded window corners (frameless + transparent window) ---- */
+html.gw-rounded { background: transparent !important; }
+html.gw-rounded {
+  border-radius: var(--gw-radius);
+  overflow: hidden;                       /* clip every child to the rounded box */
+  height: 100vh;
+  /* transform makes <html> the containing block for position:fixed children
+     (title bar, #grid/#aura/#glow, sidebar) so they ALSO clip to the rounded corners */
+  transform: translateZ(0);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12), 0 0 0 1px rgba(255,255,255,0.08);
+}
+/* body keeps its solid dark fill, just rounded + a hairline edge */
+html.gw-rounded body.gw-has-titlebar {
+  border-radius: var(--gw-radius);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.10);
+}
+/* maximized: no rounding (fills the screen, corners would look wrong) */
+html.gw-maximized, html.gw-maximized body.gw-has-titlebar { border-radius: 0 !important; }
+html.gw-maximized { height: auto; box-shadow: none; }
+
+/* root clips overflow for the rounded corners, so scroll moves to the content column */
+html.gw-rounded body.gw-has-titlebar { height: 100vh; }
+html.gw-rounded body.gw-has-titlebar .app { height: 100%; min-height: 0; overflow: hidden; }
+html.gw-rounded body.gw-has-titlebar .main { height: 100%; overflow-y: auto; }
+html.gw-maximized body.gw-has-titlebar,
+html.gw-maximized body.gw-has-titlebar .app,
+html.gw-maximized body.gw-has-titlebar .main { height: auto; overflow: visible; }
+
+/* push the whole app down so nothing hides behind the fixed bar */
+body.gw-has-titlebar { padding-top: var(--gw-titlebar-h); }
+
+/* full-height fixed layout elements start below the bar */
+body.gw-has-titlebar #grid,
+body.gw-has-titlebar #aura,
+body.gw-has-titlebar #glow { top: var(--gw-titlebar-h) !important; }
+
+body.gw-has-titlebar .sidebar { height: calc(100vh - var(--gw-titlebar-h)) !important; }
+
+.gw-titlebar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--gw-titlebar-h);
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  /* gray → black gradient bar */
+  background: linear-gradient(180deg, #1a1a1a 0%, #101010 55%, #0a0a0a 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.6);
+  border-top-left-radius: var(--gw-radius);
+  border-top-right-radius: var(--gw-radius);
+  -webkit-app-region: drag;      /* whole bar is a drag handle */
+  user-select: none;
+}
+html.gw-maximized .gw-titlebar { border-radius: 0; }
+
+/* ---- macOS traffic lights ---- */
+.gw-traffic {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  -webkit-app-region: no-drag;   /* buttons must be clickable */
+}
+
+.gw-tl {
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+  box-shadow: inset 0 0 0 0.5px rgba(0,0,0,0.35);
+  transition: filter .12s ease, transform .08s ease;
+  display: grid;
+  place-items: center;
+}
+.gw-tl:active { transform: scale(0.92); }
+
+.gw-close { background: #ff5f57; }
+.gw-min   { background: #febc2e; }
+.gw-max   { background: #28c840; }
+
+/* dim when the window isn't focused (mac behavior) */
+body:not(.gw-focused) .gw-tl { background: #3a3a3a; box-shadow: inset 0 0 0 0.5px rgba(0,0,0,0.4); }
+
+/* glyphs appear inside the lights on hover, mac-style */
+.gw-tl svg { width: 8px; height: 8px; opacity: 0; transition: opacity .1s ease; }
+.gw-traffic:hover .gw-tl svg { opacity: 0.65; }
+.gw-tl svg path { stroke: #4d0000; stroke-width: 1.4; stroke-linecap: round; fill: none; }
+.gw-min svg path  { stroke: #5a3d00; }
+.gw-max svg path  { stroke: #003b00; }
+
+/* ---- title text ---- */
+.gw-title {
+  font-family: var(--font, 'Inter', sans-serif);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #b7b7b7;
+  text-transform: uppercase;
+  margin-left: 6px;
+  pointer-events: none;
+}
+.gw-title b { color: #f4f4f4; }
+.gw-title .accent { color: #8a8a8a; }
