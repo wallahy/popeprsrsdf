@@ -1,0 +1,6 @@
+/*
+ * GhostWare — GitHub Pages redirect rules
+ * All 404s go to index.html for SPA-style routing
+ */
+/index.html  200
+/*          /index.html  200
